@@ -4,6 +4,10 @@ A reusable, on-chain dispute resolution primitive for GenLayer. Any escrow contr
 
 The contract uses GenLayer's AI-validator consensus to independently fetch live evidence from both parties, evaluate it against explicit resolution criteria, and produce a structured ruling that is permanently stored on-chain.
 
+**Live contract:** `0x0D194e34EdAC7E099Ce804cEF918d5d6CE04a858` · GenLayer StudioNet  
+**Explorer:** [explorer-studio.genlayer.com](https://explorer-studio.genlayer.com)  
+**Deploy tx:** `0xb93ecfd059761dea6c5a2a367006ecb51e941b2a380dc2d1cc109121fa9626ac`
+
 ---
 
 ## Purpose
