@@ -344,36 +344,43 @@ Return a JSON object with EXACTLY these keys:
               1. decision          — exact string match
               2. claimant_%        — abs(leader - mine) <= 10
               3. confidence        — abs(leader - mine) <= 20
+
+            Any exception during independent evaluation returns False so a
+            transient fetch or LLM error on the validator side registers as
+            disagreement rather than crashing the consensus round.
             """
-            if not isinstance(leader_result, gl.vm.Return):
-                return False
-            leader = leader_result.calldata
-            if not isinstance(leader, dict):
-                return False
-            if leader.get("decision") not in DECISIONS:
-                return False
+            try:
+                if not isinstance(leader_result, gl.vm.Return):
+                    return False
+                leader = leader_result.calldata
+                if not isinstance(leader, dict):
+                    return False
+                if leader.get("decision") not in DECISIONS:
+                    return False
 
-            my_result = leader_fn()
-            if not isinstance(my_result, dict):
-                return False
+                my_result = leader_fn()
+                if not isinstance(my_result, dict):
+                    return False
 
-            # 1. Direction of ruling must agree exactly
-            if leader.get("decision") != my_result.get("decision"):
-                return False
+                # 1. Direction of ruling must agree exactly
+                if leader.get("decision") != my_result.get("decision"):
+                    return False
 
-            # 2. Award percentage must be within ±10 points
-            leader_pct = int(leader.get("claimant_percentage") or 0)
-            my_pct     = int(my_result.get("claimant_percentage") or 0)
-            if abs(leader_pct - my_pct) > 10:
-                return False
+                # 2. Award percentage must be within ±10 points
+                leader_pct = int(leader.get("claimant_percentage") or 0)
+                my_pct     = int(my_result.get("claimant_percentage") or 0)
+                if abs(leader_pct - my_pct) > 10:
+                    return False
 
-            # 3. Confidence must be within ±20 points
-            leader_conf = int(leader.get("confidence") or 0)
-            my_conf     = int(my_result.get("confidence") or 0)
-            if abs(leader_conf - my_conf) > 20:
-                return False
+                # 3. Confidence must be within ±20 points
+                leader_conf = int(leader.get("confidence") or 0)
+                my_conf     = int(my_result.get("confidence") or 0)
+                if abs(leader_conf - my_conf) > 20:
+                    return False
 
-            return True
+                return True
+            except Exception:
+                return False
 
         result = gl.vm.run_nondet_unsafe(leader_fn, validator_fn)
 
